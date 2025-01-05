@@ -151,8 +151,8 @@ def main():
                         dest='language',
                         type=str.lower,
                         required=False,
-                        default='English',
-                        const='English',
+                        default='en',
+                        const='en',
                         nargs='?')
 
     try:
