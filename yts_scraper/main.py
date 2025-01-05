@@ -146,7 +146,7 @@ def main():
                         const=1,
                         nargs='?')
 
-    parser.add_argument('-l, '--language',
+    parser.add_argument('-l', '--language',
                         help='Enter language',
                         dest='language',
                         type=str.lower,
