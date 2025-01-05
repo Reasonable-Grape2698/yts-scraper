@@ -51,7 +51,7 @@ For instance, this command downloads every 1080p sci-fi movie and their posters 
 |`-c` or `--categorize-by`  |Creates a folder structure. Available options are: "rating", "genre", "rating-genre", "genre-rating"                                                                   |
 |`-y` or `--year-limit`     |Filters out movies older than the given value.                                                                                                                         |
 |`-p` or `--page`           |Can be used to skip ahead an amount of pages.           
-|`-l` or `--language`       |specify language      |
+|`-l` or `--language`       |Specify language      |
 
 ## Disclaimer
 This is a proof of concept tool built mainly to practice programming.
