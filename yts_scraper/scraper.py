@@ -219,7 +219,7 @@ class Scraper:
 
         if year < self.year_limit:
             return
-        if language != self.language
+        if language != self.language:
             return
 
 
