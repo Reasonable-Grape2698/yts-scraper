@@ -28,6 +28,7 @@ class Scraper:
         self.imdb_id = args.imdb_id
         self.multiprocess = args.multiprocess
         self.csv_only = args.csv_only
+        self.language = args.language
 
         self.movie_count = None
         self.url = None
@@ -217,6 +218,8 @@ class Scraper:
         yts_url = movie.get('url')
 
         if year < self.year_limit:
+            return
+        if language != self.language
             return
 
 
