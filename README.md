@@ -53,8 +53,7 @@ For instance, this command downloads every 1080p sci-fi movie and their posters 
 |`-p` or `--page`           |Can be used to skip ahead an amount of pages.           
 |`-l` or `--language`       | Specify language  (Default en , find options at https://yts.mx/browse-movies/0/all/all/0/latest/0/foreign, note the code shown ie, [fr])
          |
-|`-d` or `--date-up-min`       | Starting upload date DD/MM/YYYY format (e.g., 25/12/2024)
-         |
+|`-d` or `--date-up-min`       | Starting upload date DD/MM/YYYY format (e.g., 25/12/2024) |
 
 ## Disclaimer
 This is a proof of concept tool built mainly to practice programming.
