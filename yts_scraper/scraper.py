@@ -4,6 +4,7 @@ import math
 import json
 import csv
 import datetime
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 import requests
 from tqdm import tqdm
@@ -30,6 +31,7 @@ class Scraper:
         self.multiprocess = args.multiprocess
         self.csv_only = args.csv_only
         self.language = args.language
+        self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(date_string, "%d/%m/%Y").timetuple()))
         self.date_up_min = args.date_up_min
 
         self.movie_count = None
@@ -137,7 +139,7 @@ class Scraper:
 
 
         print('Initializing download with these parameters:\n')
-        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
+        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nMinimum Upload Date:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
               .format(
                   self.directory,
                   self.quality,
@@ -225,7 +227,7 @@ class Scraper:
             return
         if language != self.language:
             return
-        if date_uploaded_unix < datetime.datetime.strptime(date_up_min, "%d/%m/%Y").timestamp()
+        if date_uploaded_unix < date_up_min_unix
             return
 
 
