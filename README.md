@@ -50,10 +50,9 @@ For instance, this command downloads every 1080p sci-fi movie and their posters 
 |`-s` or `--sort-by`        |Download order. Available options are: "title", "year", "rating", "latest", "peers", "seeds", "download_count", "like_count", "date_added"                             |
 |`-c` or `--categorize-by`  |Creates a folder structure. Available options are: "rating", "genre", "rating-genre", "genre-rating"                                                                   |
 |`-y` or `--year-limit`     |Filters out movies older than the given value.                                                                                                                         |
-|`-p` or `--page`           |Can be used to skip ahead an amount of pages.           
-|`-l` or `--language`       | Specify language  (Default en , find options at https://yts.mx/browse-movies/0/all/all/0/latest/0/foreign, note the code shown ie, [fr])
-         |
-|`-d` or `--date-up-min`       | Starting upload date DD/MM/YYYY format (e.g., 25/12/2024) |
+|`-p` or `--page`           |Can be used to skip ahead an amount of pages.                                                                                                                          |
+|`-l` or `--language`       | Specify language  (Default en , find options at https://yts.mx/browse-movies/0/all/all/0/latest/0/foreign, note the code shown ie, [fr])                              |
+|`-d` or `--date-up-min`    | Starting upload date DD/MM/YYYY format (e.g., 25/12/2024)                                                                                                             |
 
 ## Disclaimer
 This is a proof of concept tool built mainly to practice programming.
