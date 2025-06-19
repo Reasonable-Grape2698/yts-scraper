@@ -36,23 +36,23 @@ For instance, this command downloads every 1080p sci-fi movie and their posters 
 
 ## Options
 
-| Commands                  | Description                                                                                                                                                           |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|`-h` or `--help`           |Prints help text. Also prints out all the available optional arguments.                                                                                                |
-|`-o` or `--output`         |Output directory                                                                                                                                                       |
-|`-b` or `--background`     |Append "-b" to download movie posters. This will pack .torrent file and the image together in a folder.                                                                |
-|`-m` or `--multiprocess`   |Append -m to download using multiprocessor. This option makes the process significantly faster but is prone to raising flags and causing server to deny requests.      |
-|`--csv-only`               |Append --csv-only to log scraped data ONLY to a CSV file. With this argument torrent files will not be downloaded.                                                     |
-|`-i` or `--imdb-id`        |Append -i to append IMDb ID to filename.                                                                                                                               |
-|`-q` or `--quality`        |Video quality. Available options are: "all", "720p", "1080p", "3d"                                                                                                     |
-|`-g` or `--genre`          |Movie genre. Available options are: "all", "action", "adventure", "animation", "biography", "comedy", "crime", "documentary", "drama", "family", "fantasy", "film-noir", "game-show", "history", "horror", "music", "musical", "mystery", "news", "reality-tv", "romance", "sci-fi", "sport", "talk-show", "thriller", "war", "western".|
-|`-r` or `--rating`         |Minimum rating score. Enter an integer between 0 and 9.                                                                                                                |
-|`-s` or `--sort-by`        |Download order. Available options are: "title", "year", "rating", "latest", "peers", "seeds", "download_count", "like_count", "date_added"                             |
-|`-c` or `--categorize-by`  |Creates a folder structure. Available options are: "rating", "genre", "rating-genre", "genre-rating"                                                                   |
-|`-y` or `--year-limit`     |Filters out movies older than the given value.                                                                                                                         |
-|`-p` or `--page`           |Can be used to skip ahead an amount of pages.                                                                                                                          |
-|`-l` or `--language`       | Specify language  (Default en , find options at https://yts.mx/browse-movies/0/all/all/0/latest/0/foreign, note the code shown ie, [fr])                              |
-|`-d` or `--date-up-min`    | Starting upload date DD/MM/YYYY format (e.g., 25/12/2024)                                                                                                             |
+| Commands                                | Description                                                                                                                                             |
+|-----------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`-h` or `--help`                         |Prints help text. Also prints out all the available optional arguments.                                                                                  |
+|`-o` or `--output`                       |Output directory                                                                                                                                         |
+|`-b` or `--background`                   |Append "-b" to download movie posters. This will pack .torrent file and the image together in a folder.                                                  |
+|`-m` or `--multiprocess`                 |Append -m to download using multiprocessor. This option makes the process significantly faster but is prone to causing rate limiting.                    |
+|`--csv-only`                             |Append --csv-only to log scraped data ONLY to a CSV file. With this argument torrent files will not be downloaded.                                       |
+|`-i` or `--imdb-id`                      |Append -i to append IMDb ID to filename.                                                                                                                 |
+|`-q` or `--quality`                      |Video quality. Available options are: "all", "720p", "1080p", "3d"                                                                                       |
+|`-g` or `--genre`                        |Movie genre. Available options are: "all", "action", "adventure", "animation", "biography", "comedy", "crime", "documentary", "drama", "family", "fantasy", "film-noir", "game-show", "history", "horror", "music", "musical", "mystery", "news", "reality-tv", "romance", "sci-fi", "sport", "talk-show", "thriller", "war", "western".             |
+|`-r` or `--rating`                       |Minimum rating score. Enter an integer between 0 and 9.                                                                                                  |
+|`-s` or `--sort-by`                      |Download order. Available options are: "title", "year", "rating", "latest", "peers", "seeds", "download_count", "like_count", "date_added"               |
+|`-c` or `--categorize-by`                |Creates a folder structure. Available options are: "rating", "genre", "rating-genre", "genre-rating"                                                     |
+|`-y` or `--year-limit`                   |Filters out movies older than the given value.                                                                                                           |
+|`-p` or `--page`                         |Can be used to skip ahead an amount of pages.                                                                                                            |
+|`-l` or `--language`                     |Specify language  (Default en , find options at https://yts.mx/browse-movies/0/all/all/0/latest/0/foreign, note the code shown ie, [fr])                |
+|`-d` or `--date-up-min`                  |Starting upload date DD/MM/YYYY format (e.g., 25/12/2024)                                                                                               |
 
 ## Disclaimer
 This is a proof of concept tool built mainly to practice programming.
