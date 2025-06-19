@@ -3,6 +3,7 @@ import sys
 import math
 import json
 import csv
+import datetime
 from concurrent.futures.thread import ThreadPoolExecutor
 import requests
 from tqdm import tqdm
@@ -29,6 +30,7 @@ class Scraper:
         self.multiprocess = args.multiprocess
         self.csv_only = args.csv_only
         self.language = args.language
+        self.date_up_min = args.date_up_min
 
         self.movie_count = None
         self.url = None
@@ -143,6 +145,7 @@ class Scraper:
                   self.minimum_rating,
                   self.categorize,
                   self.year_limit,
+                  self.date_up_min,
                   self.page_arg,
                   str(self.poster),
                   str(self.imdb_id),
@@ -216,10 +219,13 @@ class Scraper:
         year = movie.get('year')
         language = movie.get('language')
         yts_url = movie.get('url')
+        date_uploaded_unix = movie.get('date_uploaded_unix')
 
         if year < self.year_limit:
             return
         if language != self.language:
+            return
+        if date_uploaded_unix < datetime.datetime.strptime(date_up_min, "%d/%m/%Y").timestamp()
             return
 
 
