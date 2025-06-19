@@ -53,13 +53,12 @@ class Scraper:
             self.directory = os.path.join(os.path.curdir, self.categorize.title())
 
 
-        # Args for downloading in reverse chronological order
-        if args.sort_by == 'latest':
-            self.sort_by = 'date_added'
+        # Args for downloading in reverse chronological order, unless sort_by 'latest' or 'date_up_min' set.
+        if args.sort_by == 'latest' or args.date_up_min:
+            self.sort_by = 'date_uploaded_unix'
             self.order_by = 'desc'
         else:
             self.order_by = 'asc'
-
 
         # YTS API has a limit of 50 entries
         self.limit = 50
