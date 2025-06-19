@@ -1,6 +1,18 @@
 import argparse
 import traceback
+import datetime
+import time
 from yts_scraper.scraper import Scraper
+
+def parse_date_to_unix(date_string):
+    try:
+        dt_object = datetime.datetime.strptime(date_string, "%d/%m/%Y")
+        unix_timestamp = int(time.mktime(dt_object.timetuple()))
+        return unix_timestamp
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            f"Invalid date format: '{date_string}'. Expected format: DD/MM/YYYY"
+        )
 
 
 def main():
@@ -153,6 +165,15 @@ def main():
                         required=False,
                         default='en',
                         const='en',
+                        nargs='?')
+
+    parser.add_argument('-d', '--date-up-min',
+                        help='Date Uploaded Minimum DD/MM/YYYY format (e.g., 25/12/2024)',
+                        dest='date_up_min',
+                        type=parse_date_to_unix
+                        required=False,
+                        default='en',
+                        const='0',
                         nargs='?')
 
     try:
