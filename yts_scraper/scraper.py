@@ -320,6 +320,8 @@ class Scraper:
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
             hash = torrent.get('hash')
             date_uploaded_unix = torrent.get('date_uploaded_unix')
+            print(hash)
+            print(date_uploaded_unix)
             if date_uploaded_unix < self.date_up_min_unix:
                 tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
                 self.minimum_date_skipped += 1
@@ -338,19 +340,11 @@ class Scraper:
 
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
-            if self.categorize and self.categorize != 'none':
-                if self.quality == 'all' or self.quality == quality:
-                    bin_content_tor = (requests.get(torrent.get('url'))).content
-                    
-                    for genre in movie_genres:
-                        path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
-                        is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
-            else:
-                if self.quality == 'all' or self.quality == quality:
-                    self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
-                    bin_content_tor = (requests.get(torrent_url)).content
-                    path = self.__build_path(movie_name, movie_rating, quality, None, imdb_id)
-                    is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
+            if self.quality == 'all' or self.quality == quality:
+                bin_content_tor = (requests.get(torrent.get('url'))).content
+                path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
+                is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
+                self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
 
             if is_download_successful:
                 tqdm.write('Downloaded {} {}'.format(movie_name, quality.upper()))
@@ -391,14 +385,12 @@ class Scraper:
     def __download_file(self, bin_content_tor, bin_content_img, path, movie_name, movie_id):
         if self.csv_only:
             return
-        print(path, movie_name, movie_id)
 
         if self.existing_file_counter > 10 and not self.skip_exit_condition:
             tqdm.write('Found 10 existing files in a row. Do you want to keep downloading? Y/N')
             self.__prompt_existing()
 
         if os.path.isfile(path):
-            tqdm.write('{}: File already exists. Skipping...'.format(movie_name))
             self.existing_file_counter += 1
             return False
             
