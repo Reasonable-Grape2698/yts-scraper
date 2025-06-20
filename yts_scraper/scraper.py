@@ -33,6 +33,7 @@ class Scraper:
         self.language = args.language
         self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(args.date_up_min, "%d/%m/%Y").timetuple()))
         self.date_up_min = args.date_up_min
+        self.downloaded_movies = args.downloaded_movies
         self.movie_count = None
         self.url = None
         self.existing_file_counter = None
@@ -105,8 +106,8 @@ class Scraper:
             return hashes
 
         # Setup hashlist, if flag set
-        if args.downloaded_movies:
-            self.downloaded_movie_hashes == hash_importer(arg.downloaded_movies)
+        if self.downloaded_movies:
+            self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
             
         self.pbar = None
 
