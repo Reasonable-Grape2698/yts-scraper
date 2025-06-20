@@ -319,6 +319,7 @@ class Scraper:
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
             hash = torrent.get('hash')
             date_uploaded_unix = torrent.get('date_uploaded_unix')
+            print(hash)
             if date_uploaded_unix < self.date_up_min_unix:
                 print('1')
                 tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
