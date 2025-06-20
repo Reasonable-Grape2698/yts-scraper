@@ -157,7 +157,7 @@ def main():
                         nargs='?')
 
     parser.add_argument('-d', '--date-up-min',
-                        help='Date Uploaded Minimum DD/MM/YYYY format (e.g., 25/12/2024)',
+                        help='Date Uploaded Minimum DD/MM/YYYY format (e.g 25/12/2024)',
                         dest='date_up_min',
                         type=str.lower,
                         required=False,
