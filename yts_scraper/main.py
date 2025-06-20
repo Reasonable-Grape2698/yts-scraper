@@ -161,7 +161,7 @@ def main():
                         dest='date_up_min',
                         type=str.lower,
                         required=False,
-                        default='en',
+                        default='01/01/1970',
                         const='01/01/1970',
                         nargs='?')
 
