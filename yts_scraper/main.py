@@ -173,7 +173,16 @@ def main():
                         type=parse_date_to_unix
                         required=False,
                         default='en',
-                        const='0',
+                        const='01/01/1970',
+                        nargs='?')
+
+    parser.add_argument('-h', '--downloaded-movie-hashes',
+                        help='Simple line seperated file of downloaded movie IDs',
+                        dest='downloaded_movies',
+                        type=str.lower,
+                        required=False,
+                        default='',
+                        const='',
                         nargs='?')
 
     try:
