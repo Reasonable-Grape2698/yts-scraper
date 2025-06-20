@@ -391,6 +391,7 @@ class Scraper:
 
     # Write binary content to .torrent file
     def __download_file(self, bin_content_tor, bin_content_img, path, movie_name, movie_id):
+        print("downloading file")
         if self.csv_only:
             return
 
