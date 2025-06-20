@@ -54,8 +54,10 @@ class Scraper:
                 elif isinstance(data_structure, list):
                     for item in data_structure:
                         yield from json_find_values_by_key(item)
-                                
-                # Try opening the file
+
+            if hashFile == '[]':
+                return []
+             # Try opening the file
             try:
                 with open(hashFile, mode='r') as file:
                     fileTemp = list(file)
