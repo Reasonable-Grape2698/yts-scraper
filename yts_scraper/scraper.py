@@ -197,7 +197,7 @@ class Scraper:
         # the script tries to download the movie more than once.
         # IDs of downloaded movie is stored in this array
         # to check if it's been downloaded before
-        self.downloaded_movie_ids = arg.downloaded_movie_ids
+        self.downloaded_movie_ids = []
 
         # Calculate page count and make sure that it doesn't
         # get the value of 1 to prevent range(1, 1)
