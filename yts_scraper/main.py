@@ -156,8 +156,8 @@ def main():
                         const='en',
                         nargs='?')
 
-    parser.add_argument('-d', '--date-up-min',
-                        help='Date Uploaded Minimum DD/MM/YYYY format (e.g 25/12/2024)',
+    parser.add_argument('-u', '--date-up-min',
+                        help='Minimum upload date, DD/MM/YYYY format (e.g 25/12/2024)',
                         dest='date_up_min',
                         type=str.lower,
                         required=False,
@@ -165,7 +165,7 @@ def main():
                         const='01/01/1970',
                         nargs='?')
 
-    parser.add_argument('-h', '--downloaded_movies',
+    parser.add_argument('-d', '--downloaded_movies',
                         help='CSV JSON or line seperated movie hash list',
                         dest='downloaded_movies',
                         type=str.lower,
