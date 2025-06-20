@@ -56,7 +56,7 @@ class Scraper:
                         yield from json_find_values_by_key(item)
 
             if hashFile == '[]':
-                return []
+                return None
              # Try opening the file
             try:
                 with open(hashFile, mode='r') as file:
@@ -65,7 +65,7 @@ class Scraper:
                 if hashFile != '[]':
                     print(f"Error: The file '{hashFile}' was not found. Continue? Y/N  (set to None if no)")
                     self.__prompt_existing()
-                return []
+                return None
         
                     # Hope it's JSON and find literally any key in called 'hash'
             try:
@@ -326,7 +326,8 @@ class Scraper:
 
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
             hash = torrent.get('hash')
-            if hash in self.downloaded_movie_hashes:
+            
+            if self.downloaded_movie_hashes and hash in self.downloaded_movie_hashes:
                 tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
                 self.existing_hash_counter += 1
                 if self.existing_hash_counter > 10 and not self.skip_exit_condition:
