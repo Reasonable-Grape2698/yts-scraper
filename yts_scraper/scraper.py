@@ -371,9 +371,8 @@ class Scraper:
             directory += '/' + str(math.trunc(rating)) + '+/' + movie_genre
         elif self.categorize == 'genre-rating':
             directory += '/' + str(movie_genre) + '/' + str(math.trunc(rating)) + '+'
-        elif self.categorize is None:
-            directory = self.directory
-
+        elif self.categorize == 'none':
+            directory += '/'
         if self.poster:
             directory += '/' + movie_name
 
