@@ -77,14 +77,14 @@ def main():
     parser.add_argument('-c', '--categorize-by',
                         help='''Creates a folder structure.
                                 Valid arguments are: "rating", "genre",
-                                "rating-genre","genre-rating
+                                "rating-genre","genre-rating","none"
                              ''',
                         dest='categorize_by',
                         type=str.lower,
                         required=False,
                         choices=['none', 'rating', 'genre', 'genre-rating', 'rating-genre'],
-                        default='rating',
-                        const='rating',
+                        default='none',
+                        const='none',
                         nargs='?')
 
     parser.add_argument('-y', '--year-limit',
