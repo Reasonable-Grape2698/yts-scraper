@@ -2,75 +2,71 @@ import os
 import sys
 import math
 import json
-import csv
+import datetime
+import time
 from concurrent.futures.thread import ThreadPoolExecutor
 import requests
 from tqdm import tqdm
 from fake_useragent import UserAgent
 
 class Scraper:
-    """
-    Scraper class.
-
-    Must be initialized with args from argparser
-    """
     # Constructor
     def __init__(self, args):
-        self.output = args.output
-        self.genre = args.genre
-        self.minimum_rating = args.rating
-        self.quality = '3D' if (args.quality == '3d') else args.quality
-        self.categorize = args.categorize_by
-        self.sort_by = args.sort_by
-        self.year_limit = args.year_limit
-        self.page_arg = args.page
-        self.poster = args.background
-        self.imdb_id = args.imdb_id
-        self.multiprocess = args.multiprocess
-        self.csv_only = args.csv_only
         self.language = args.language
-
+        self.date_up_min = args.date_up_min
+        self.downloaded_movies = args.downloaded_movies
+        self.apiKey = args.apiKey
         self.movie_count = None
         self.url = None
-        self.existing_file_counter = None
+        self.existing_hash_counter = None
+        self.minimum_date_skipped = None
         self.skip_exit_condition = None
-        self.downloaded_movie_ids = None
+        self.downloaded_movie_hashes = None
+        self.date_up_min_unix = int(datetime.datetime.strptime(self.date_up_min, "%d/%m/%Y").timestamp())
+
+        def hash_importer(hashFile):
+            hashes = []
+            def json_find_values_by_key(data_structure):
+                if isinstance(data_structure, dict):
+                    for key, value in data_structure.items():
+                        if key == 'hash':
+                            yield value
+                        yield from json_find_values_by_key(value)
+                elif isinstance(data_structure, list):
+                    for item in data_structure:
+                        yield from json_find_values_by_key(item)
+                        
+             # Try opening the file
+            try:
+                with open(hashFile, 'r') as file:
+                    data = json.load(file)
+            except FileNotFoundError:
+                print(f"Error: The file '{hashFile}' was not found. Continue? Y/N  (set to None if no)")
+                    self.__prompt_existing()
+                return []
+        
+                    # Hope it's JSON and find literally any key in called 'hash'
+            try:
+                hashes = list(json_find_values_by_key(data))
+                return hashes
+            except Exception as e:
+                return []
+        
+        # Setup hashlist, if flag set
+        self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
+
         self.pbar = None
+        self.sort_by = 'date_uploaded_unix'
+        self.order_by = 'desc'
 
-
-        # Set output directory
-        if args.output:
-            if not args.csv_only:
-                os.makedirs(self.output, exist_ok=True)
-            self.directory = os.path.join(os.path.curdir, self.output)
-        else:
-            if not args.csv_only:
-                os.makedirs(self.categorize.title(), exist_ok=True)
-            self.directory = os.path.join(os.path.curdir, self.categorize.title())
-
-
-        # Args for downloading in reverse chronological order
-        if args.sort_by == 'latest':
-            self.sort_by = 'date_added'
-            self.order_by = 'desc'
-        else:
-            self.order_by = 'asc'
-
-
-        # YTS API has a limit of 50 entries
         self.limit = 50
 
 
     # Connect to API and extract initial data
     def __get_api_data(self):
         # Formatted URL string
-        url = '''https://yts.mx/api/v2/list_movies.json?quality={quality}&genre={genre}&minimum_rating={minimum_rating}&sort_by={sort_by}&order_by={order_by}&limit={limit}&page='''.format(
+        url = '''https://yts.mx/api/v2/list_movies.json?quality={quality}&page='''.format(
             quality=self.quality,
-            genre=self.genre,
-            minimum_rating=self.minimum_rating,
-            sort_by=self.sort_by,
-            order_by=self.order_by,
-            limit=self.limit
         )
 
         # Generate random user agent header
@@ -114,8 +110,8 @@ class Scraper:
         self.url = url
 
     def __initialize_download(self):
-        # Used for exit/continue prompt that's triggered after 10 existing files
-        self.existing_file_counter = 0
+        self.existing_hash_counter = 0
+        self.minimum_date_skipped = 0
         self.skip_exit_condition = False
 
         # YTS API sometimes returns duplicate objects and
@@ -132,23 +128,6 @@ class Scraper:
             page_count = math.trunc(self.movie_count / self.limit) + 1
 
         range_ = range(int(self.page_arg), page_count)
-
-
-        print('Initializing download with these parameters:\n')
-        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
-              .format(
-                  self.directory,
-                  self.quality,
-                  self.genre,
-                  self.minimum_rating,
-                  self.categorize,
-                  self.year_limit,
-                  self.page_arg,
-                  str(self.poster),
-                  str(self.imdb_id),
-                  str(self.multiprocess)
-                  )
-             )
 
         if self.movie_count <= 0:
             print('Could not find any movies with given parameters')
@@ -208,143 +187,87 @@ class Scraper:
 
     # Determine which .torrent files to download
     def __filter_torrents(self, movie):
-        movie_id = str(movie.get('id'))
-        movie_rating = movie.get('rating')
-        movie_genres = movie.get('genres') if movie.get('genres') else ['None']
-        movie_name_short = movie.get('title')
-        imdb_id = movie.get('imdb_code')
-        year = movie.get('year')
         language = movie.get('language')
-        yts_url = movie.get('url')
 
-        if year < self.year_limit:
-            return
         if language != self.language:
             return
 
-
-
         # Every torrent option for current movie
         torrents = movie.get('torrents')
-        # Remove illegal file/directory characters
-        movie_name = movie.get('title_long').translate({ord(i):None for i in "'/\:*?<>|"})
-
-        # Used to multiple download messages for multi-folder categorization
-        is_download_successful = False
-
-        if movie_id in self.downloaded_movie_ids:
-            return
-
-        # In case movie has no available torrents
+        
         if torrents is None:
             tqdm.write('Could not find any torrents for {}. Skipping...'.format(movie_name))
             return
 
-        bin_content_img = (requests.get(movie.get('large_cover_image'))).content if self.poster else None
-
-        # Iterate through available torrent files
         for torrent in torrents:
-            quality = torrent.get('quality')
-            torrent_url = torrent.get('url')
-            if self.categorize and self.categorize != 'rating':
-                if self.quality == 'all' or self.quality == quality:
-                    bin_content_tor = (requests.get(torrent.get('url'))).content
+            # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
+            hash = torrent.get('hash')
+            date_uploaded_unix = torrent.get('date_uploaded_unix')
+            
+            if date_uploaded_unix < self.date_uploaded_unix
+                tqdm.write('{}: Before date upload minimum. Skipping...'.format(movie_name))
+                self.minimum_date_skipped += 1
+                return
+            
+            if hash in self.downloaded_movie_hashes:
+                tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
+                self.existing_hash_counter += 1
+                return
 
-                    for genre in movie_genres:
-                        path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
-                        is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
-            else:
-                if self.quality == 'all' or self.quality == quality:
-                    self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
-                    bin_content_tor = (requests.get(torrent_url)).content
-                    path = self.__build_path(movie_name, movie_rating, quality, None, imdb_id)
-                    is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
+            if self.existing_hash_counter > 10 or self.minimum_date_skipped > 10:
+                tqdm.write('Found 10 existing hashes and/or 10 < date_uploaded_min. Do you want to keep downloading? Y/N')
+                self.__prompt_existing()
+                
+            is_download_successful = False
+            is_download_successful = __real_debrid_dl('magnet:?xt=urn:btih:' + hash + '&dn=&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopentor.org%3A2710&tr=udp%3A%2F%2Ftracker.ccc.de%3A80&tr=udp%3A%2F%2Ftracker.blackunicorn.xyz%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969')
 
-            if is_download_successful and self.quality == 'all' or self.quality == quality:
-                tqdm.write('Downloaded {} {}'.format(movie_name, quality.upper()))
+            if is_download_successful:
+                tqdm.write('Added {} {}'.format(movie_name, quality.upper()))
                 self.pbar.update()
+            else
+                tqdm.write('Failed to add {} {}'.format(movie_name, quality.upper()))
 
+    def __real_debrid_dl(magnet):
+        payload = {
+            "magnet": magnet,
+        }
+        url = 'https://api.real-debrid.com/rest/1.0/torrents/addMagnet'
+        
+        
+        # Generate random user agent header
+        try:
+            user_agent = UserAgent()
+            headers = {'User-Agent': user_agent.random, 'Content-Type': 'application/octet-stream', 'Authorization: Bearer {self.apiKey}'}
+        except:
+            print('Error occurred during fake user agent generation.')
 
-    # Creates a file path for each download
-    def __build_path(self, movie_name, rating, quality, movie_genre, imdb_id):
-        if self.csv_only:
-            return
+        # Exception handling for connection errors
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('HTTP Error:', errh)
+            sys.exit(0)
+        except requests.exceptions.ConnectionError as errc:
+            print('Error Connecting:', errc)
+            sys.exit(0)
+        except requests.exceptions.Timeout as errt:
+            print('Timeout Error:', errt)
+            sys.exit(0)
+        except requests.exceptions.RequestException as err:
+            print('There was an error.', err)
+            sys.exit(0)
 
-        directory = self.directory
+        # Exception handling for JSON decoding errors
+        try:
+            data = response.json()
+            return true;
+        except json.decoder.JSONDecodeError:
+            print('Could not decode JSON, possible error?')
+            return false
 
-        if self.categorize == 'rating':
-            directory += '/' + str(math.trunc(rating)) + '+'
-        elif self.categorize == 'genre':
-            directory += '/' + str(movie_genre)
-        elif self.categorize == 'rating-genre':
-            directory += '/' + str(math.trunc(rating)) + '+/' + movie_genre
-        elif self.categorize == 'genre-rating':
-            directory += '/' + str(movie_genre) + '/' + str(math.trunc(rating)) + '+'
-
-        if self.poster:
-            directory += '/' + movie_name
-
-        os.makedirs(directory, exist_ok=True)
-
-        if self.imdb_id:
-            filename = '{} {} - {}'.format(movie_name, quality, imdb_id)
-        else:
-            filename = '{} {}'.format(movie_name, quality)
-
-        path = os.path.join(directory, filename)
-        return path
-
-    # Write binary content to .torrent file
-    def __download_file(self, bin_content_tor, bin_content_img, path, movie_name, movie_id):
-        if self.csv_only:
-            return
-
-        if self.existing_file_counter > 10 and not self.skip_exit_condition:
-            self.__prompt_existing_files()
-
-        if os.path.isfile(path):
-            tqdm.write('{}: File already exists. Skipping...'.format(movie_name))
-            self.existing_file_counter += 1
-            return False
-
-        with open(path + '.torrent', 'wb') as torrent:
-            torrent.write(bin_content_tor)
-        if self.poster:
-            with open(path + '.jpg', 'wb') as torrent:
-                torrent.write(bin_content_img)
-
-        self.downloaded_movie_ids.append(movie_id)
-        self.existing_file_counter = 0
-        return True
-
-    def __log_csv(self, id, imdb_id, name, year, language, rating, quality, yts_url, torrent_url):
-        path = os.path.join(os.path.curdir, 'YTS-Scraper.csv')
-        csv_exists = os.path.isfile(path)
-
-        with open(path, mode='a') as csv_file:
-            headers = ['YTS ID', 'IMDb ID', 'Movie Title', 'Year', 'Language', 'Rating', 'Quality', 'YTS URL', 'IMDb URL', 'Torrent URL']
-            writer = csv.DictWriter(csv_file, delimiter=',', lineterminator='\n', quotechar='"', quoting=csv.QUOTE_ALL, fieldnames=headers)
-
-            if not csv_exists:
-                writer.writeheader()
-
-            writer.writerow({'YTS ID': id,
-                             'IMDb ID': imdb_id,
-                             'Movie Title': name,
-                             'Year': year,
-                             'Language': language,
-                             'Rating': rating,
-                             'Quality': quality,
-                             'YTS URL': yts_url,
-                             'IMDb URL': 'https://www.imdb.com/title/' + imdb_id,
-                             'Torrent URL': torrent_url
-                            })
-
-
-
-    # Is triggered when the script hits 10 consecutive existing files
-    def __prompt_existing_files(self):
-        tqdm.write('Found 10 existing files in a row. Do you want to keep downloading? Y/N')
+    
+    def __prompt_existing(self):
         exit_answer = input()
 
         if exit_answer.lower() == 'n':
