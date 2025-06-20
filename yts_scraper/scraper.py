@@ -39,7 +39,7 @@ class Scraper:
         self.existing_hash_counter = None
         self.minimum_date_skipped = None
         self.skip_exit_condition = None
-        self.downloaded_movie_hashes= None
+        self.downloaded_movie_hashes = None
 
         self.date_up_min_unix = int(datetime.datetime.strptime(self.date_up_min, "%d/%m/%Y").timestamp())
 
@@ -60,8 +60,9 @@ class Scraper:
                 with open(hashFile, mode='r') as file:
                     fileTemp = list(file)
             except FileNotFoundError:
-                print(f"Error: The file '{hashFile}' was not found. Exit? Y/N  (set to None if no)")
-                self.__prompt_existing()
+                if hashFile != '[]':
+                    print(f"Error: The file '{hashFile}' was not found. Continue? Y/N  (set to None if no)")
+                    self.__prompt_existing()
                 return []
         
                     # Hope it's JSON and find literally any key in called 'hash'
@@ -95,21 +96,18 @@ class Scraper:
                         hashes.append(line.strip('\n'))
                                             
                 if hashes == []:
-                    print(f"Error: Unable to read hashes from '{hashFile}'. Exit? Y/N  (set to None if no)")
+                    print(f"Error: Unable to read hashes from '{hashFile}'. Continue? Y/N  (set to None if no)")
                     self.__prompt_existing()
                     return hashes
             except Exception as e:
-                print(f"Error:'{e}'. Exit? Y/N (downloaded hash list set to [] if no)")
+                print(f"Error:'{e}'. Continue? Y/N (downloaded hash list set to [] if no)")
                 self.__prompt_existing()
                 return hashes
             return hashes
 
         # Setup hashlist, if flag set
-        if self.downloaded_movies:
-            self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
-        else:
-            self.downloaded_movie_hashes == []
-            
+        self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
+
         self.pbar = None
 
         # Set output directory
@@ -302,7 +300,7 @@ class Scraper:
             tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
             self.minimum_date_skipped += 1
             if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
-                tqdm.write('Skipped 10 torrents due to being uploaded before specified date, exit? Y/N')
+                tqdm.write('Skipped 10 torrents due to being uploaded before specified date, continue? Y/N')
                 self.__prompt_existing()
             return
 
