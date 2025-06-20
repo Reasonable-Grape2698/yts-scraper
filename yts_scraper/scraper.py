@@ -31,16 +31,43 @@ class Scraper:
         self.multiprocess = args.multiprocess
         self.csv_only = args.csv_only
         self.language = args.language
-        self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(date_string, "%d/%m/%Y").timetuple()))
+        self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(args.date_up_min, "%d/%m/%Y").timetuple()))
         self.date_up_min = args.date_up_min
 
         self.movie_count = None
         self.url = None
         self.existing_file_counter = None
+        self.existing_hash_counter = None
+        self.minimum_date_skipped = None
         self.skip_exit_condition = None
-        self.downloaded_movie_ids = None
-        self.pbar = None
 
+        # Function to find 'hash' keys in a JSON file, no matter where they are
+        def json_find_values_by_key(data_structure):
+            if isinstance(data_structure, dict):
+                for key, value in data_structure.items():
+                    if key == 'hash':
+                        yield value
+                    yield from json_find_values_by_key(value)
+            elif isinstance(data_structure, list):
+                for item in data_structure:
+                    yield from json_find_values_by_key(item)
+        
+        try:
+            with open(json_file_path, 'r') as f:
+                data = json.load(f)
+            self.downloaded_movie_hashes = list(json_find_values_by_key(json.load(data)))
+        except FileNotFoundError:
+            print(f"Error: The file '{json_file_path}' was not found.")
+            print("Please create this file and populate it with your JSON data.")
+        except json.JSONDecodeError:
+            with open(complex_json_data) as f:
+                    self.downloaded_movie_hashes = f.readlines() 
+        except Exception as e:
+            except: 
+                self.downloaded_movie_hashes = None
+        
+
+        self.pbar = None
 
         # Set output directory
         if args.output:
@@ -119,6 +146,8 @@ class Scraper:
     def __initialize_download(self):
         # Used for exit/continue prompt that's triggered after 10 existing files
         self.existing_file_counter = 0
+        self.existing_hash_counter = 0
+        self.minimum_date_skipped = 0
         self.skip_exit_condition = False
 
         # YTS API sometimes returns duplicate objects and
@@ -212,7 +241,6 @@ class Scraper:
 
     # Determine which .torrent files to download
     def __filter_torrents(self, movie):
-        movie_id = str(movie.get('id'))
         movie_rating = movie.get('rating')
         movie_genres = movie.get('genres') if movie.get('genres') else ['None']
         movie_name_short = movie.get('title')
@@ -226,10 +254,14 @@ class Scraper:
             return
         if language != self.language:
             return
-        if date_uploaded_unix < date_up_min_unix
+        
+        if date_uploaded_unix < self.date_up_min_unix
+            tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
+            self.minimum_date_skipped += 1
+            if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
+                tqdm.write('Skipped 10 torrents due to being uploaded before specified date, exit? Y/N')
+                self.__prompt_existing()
             return
-
-
 
         # Every torrent option for current movie
         torrents = movie.get('torrents')
@@ -239,10 +271,7 @@ class Scraper:
         # Used to multiple download messages for multi-folder categorization
         is_download_successful = False
 
-        if movie_id in self.downloaded_movie_ids:
-            return
-
-        # In case movie has no available torrents
+         # In case movie has no available torrents
         if torrents is None:
             tqdm.write('Could not find any torrents for {}. Skipping...'.format(movie_name))
             return
@@ -251,6 +280,17 @@ class Scraper:
 
         # Iterate through available torrent files
         for torrent in torrents:
+
+            # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
+            hash = torrents.get('hash')
+            if hash in self.downloaded_movie_hashes:
+                tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
+                self.existing_hash_counter += 1
+                if self.existing_hash_counter > 10 and not self.skip_exit_condition:
+                    tqdm.write('Found 10 existing hashes thus far. Do you want to keep downloading? Y/N')
+                    self.__prompt_existing()
+                    return;
+
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
             if self.categorize and self.categorize != 'rating':
@@ -287,6 +327,8 @@ class Scraper:
             directory += '/' + str(math.trunc(rating)) + '+/' + movie_genre
         elif self.categorize == 'genre-rating':
             directory += '/' + str(movie_genre) + '/' + str(math.trunc(rating)) + '+'
+        elif self.categorize is None:
+            directory = self.directory
 
         if self.poster:
             directory += '/' + movie_name
@@ -307,13 +349,14 @@ class Scraper:
             return
 
         if self.existing_file_counter > 10 and not self.skip_exit_condition:
-            self.__prompt_existing_files()
+            tqdm.write('Found 10 existing files in a row. Do you want to keep downloading? Y/N')
+            self.__prompt_existing()
 
         if os.path.isfile(path):
             tqdm.write('{}: File already exists. Skipping...'.format(movie_name))
             self.existing_file_counter += 1
             return False
-
+            
         with open(path + '.torrent', 'wb') as torrent:
             torrent.write(bin_content_tor)
         if self.poster:
@@ -348,10 +391,8 @@ class Scraper:
                             })
 
 
-
-    # Is triggered when the script hits 10 consecutive existing files
-    def __prompt_existing_files(self):
-        tqdm.write('Found 10 existing files in a row. Do you want to keep downloading? Y/N')
+    def __prompt_existing(self):
+        tqdm.write('Found 10 existing torrentes prior to set minimum upload date, continue? Y/N')
         exit_answer = input()
 
         if exit_answer.lower() == 'n':
