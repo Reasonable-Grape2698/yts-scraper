@@ -165,8 +165,8 @@ def main():
                         const='01/01/1970',
                         nargs='?')
 
-    parser.add_argument('-h', '--downloaded-movie-hashes',
-                        help='CSV, JSON or line seperated movie hash list',
+    parser.add_argument('-h', '--downloaded_movies',
+                        help='CSV JSON or line seperated movie hash list',
                         dest='downloaded_movies',
                         type=str.lower,
                         required=False,
