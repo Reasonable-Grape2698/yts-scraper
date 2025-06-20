@@ -325,7 +325,7 @@ class Scraper:
                 if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
                     tqdm.write('Skipped 10 torrents due to being uploaded before specified date, continue? Y/N')
                     self.__prompt_existing()
-            return
+                return
             
             if self.downloaded_movie_hashes and hash in self.downloaded_movie_hashes:
                 tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
@@ -333,10 +333,11 @@ class Scraper:
                 if self.existing_hash_counter > 10 and not self.skip_exit_condition:
                     tqdm.write('Found 10 existing hashes thus far. Do you want to keep downloading? Y/N')
                     self.__prompt_existing()
-                    return;
+                    return
 
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
+            tqdm.write(torrent_url)
             if self.categorize and self.categorize != 'rating':
                 if self.quality == 'all' or self.quality == quality:
                     bin_content_tor = (requests.get(torrent.get('url'))).content
