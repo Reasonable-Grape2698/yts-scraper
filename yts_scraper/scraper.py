@@ -325,7 +325,7 @@ class Scraper:
         for torrent in torrents:
 
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
-            hash = torrents.get('hash')
+            hash = torrent.get('hash')
             if hash in self.downloaded_movie_hashes:
                 tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
                 self.existing_hash_counter += 1
