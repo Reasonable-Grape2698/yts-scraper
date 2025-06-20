@@ -321,6 +321,7 @@ class Scraper:
             hash = torrent.get('hash')
             date_uploaded_unix = torrent.get('date_uploaded_unix')
             if date_uploaded_unix < self.date_up_min_unix:
+                print(1)
                 tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
                 self.minimum_date_skipped += 1
                 if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
@@ -328,7 +329,8 @@ class Scraper:
                     self.__prompt_existing()
                 return
             
-            if self.downloaded_movie_hashes and hash in self.downloaded_movie_hashes:
+            if hash in self.downloaded_movie_hashes:
+                print(2)
                 tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
                 self.existing_hash_counter += 1
                 if self.existing_hash_counter > 10 and not self.skip_exit_condition:
@@ -336,13 +338,13 @@ class Scraper:
                     self.__prompt_existing()
                 return
 
-            
+            print(3)
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
             bin_content_tor = (requests.get(torrent.get('url'))).content
             path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
             is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
-            pprint(path)
+            print(path)
             print(is_download_successful)
             self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
 
