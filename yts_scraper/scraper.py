@@ -31,7 +31,6 @@ class Scraper:
         self.multiprocess = args.multiprocess
         self.csv_only = args.csv_only
         self.language = args.language
-        self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(args.date_up_min, "%d/%m/%Y").timetuple()))
         self.date_up_min = args.date_up_min
         self.downloaded_movies = args.downloaded_movies
         self.movie_count = None
@@ -41,8 +40,8 @@ class Scraper:
         self.minimum_date_skipped = None
         self.skip_exit_condition = None
         self.downloaded_movie_hashes= None
-        
-        # Function to find 'hash' keys in a JSON file, no matter where they are
+
+        self.date_up_min_unix = int(datetime.datetime.strptime(self.date_up_min, "%d/%m/%Y").timestamp())
 
         def hash_importer(hashFile):
             hashes = []
