@@ -296,7 +296,7 @@ class Scraper:
         if language != self.language:
             return
         
-        if date_uploaded_unix < self.date_up_min_unix
+        if date_uploaded_unix < self.date_up_min_unix:
             tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
             self.minimum_date_skipped += 1
             if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
