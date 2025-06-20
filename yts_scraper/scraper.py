@@ -33,40 +33,81 @@ class Scraper:
         self.language = args.language
         self.date_up_min_unix = int(time.mktime(datetime.datetime.strptime(args.date_up_min, "%d/%m/%Y").timetuple()))
         self.date_up_min = args.date_up_min
-
         self.movie_count = None
         self.url = None
         self.existing_file_counter = None
         self.existing_hash_counter = None
         self.minimum_date_skipped = None
         self.skip_exit_condition = None
-
+        self.downloaded_movie_hashes= None
+        
         # Function to find 'hash' keys in a JSON file, no matter where they are
-        def json_find_values_by_key(data_structure):
-            if isinstance(data_structure, dict):
-                for key, value in data_structure.items():
-                    if key == 'hash':
-                        yield value
-                    yield from json_find_values_by_key(value)
-            elif isinstance(data_structure, list):
-                for item in data_structure:
-                    yield from json_find_values_by_key(item)
-        
-        try:
-            with open(json_file_path, 'r') as f:
-                data = json.load(f)
-            self.downloaded_movie_hashes = list(json_find_values_by_key(json.load(data)))
-        except FileNotFoundError:
-            print(f"Error: The file '{json_file_path}' was not found.")
-            print("Please create this file and populate it with your JSON data.")
-        except json.JSONDecodeError:
-            with open(complex_json_data) as f:
-                    self.downloaded_movie_hashes = f.readlines() 
-        except Exception as e:
-            except: 
-                self.downloaded_movie_hashes = None
-        
 
+        def hash_importer(hashFile):
+            hashes = []
+            def json_find_values_by_key(data_structure):
+                if isinstance(data_structure, dict):
+                    for key, value in data_structure.items():
+                        if key == 'hash':
+                            yield value
+                        yield from json_find_values_by_key(value)
+                elif isinstance(data_structure, list):
+                    for item in data_structure:
+                        yield from json_find_values_by_key(item)
+                                
+                # Try opening the file
+            try:
+                with open(hashFile, mode='r') as file:
+                    fileTemp = list(file)
+            except FileNotFoundError:
+                print(f"Error: The file '{hashFile}' was not found. Exit? Y/N  (set to None if no)")
+                self.__prompt_existing()
+                return []
+        
+                    # Hope it's JSON and find literally any key in called 'hash'
+            try:
+                data = [json.loads(line) for line in fileTemp]
+                hashes = list(json_find_values_by_key(data))
+                if hashes != []:
+                    return hashes
+            except Exception as e:
+                pass  
+        
+            # Hope it's CSV and return 'hash' values
+            try:
+                csv = csv.DictReader(fileTemp)
+                hash1 = next(csv).get('hash')
+                if 'hash' in csv.fieldnames and len(hash1) == 40:
+                    hashes.append(hash1)
+                    for row in csv:
+                        hash = row.get('hash')
+                        if len(hash) == 40:
+                            hashes.append(hash)
+                    if hashes != []:
+                        return hashes
+            except Exception as e:
+                pass
+        
+            # Hope it's just line seperated hashes?
+            try:         
+                for line in fileTemp:
+                    if len(line.strip('\n')) == 40:
+                        hashes.append(line.strip('\n'))
+                                            
+                if hashes == []:
+                    print(f"Error: Unable to read hashes from '{hashFile}'. Exit? Y/N  (set to None if no)")
+                    self.__prompt_existing()
+                    return hashes
+            except Exception as e:
+                print(f"Error:'{e}'. Exit? Y/N (downloaded hash list set to [] if no)")
+                self.__prompt_existing()
+                return hashes
+            return hashes
+
+        # Setup hashlist, if flag set
+        if args.downloaded_movies:
+            self.downloaded_movie_hashes == hash_importer(arg.downloaded_movies)
+            
         self.pbar = None
 
         # Set output directory
@@ -392,7 +433,6 @@ class Scraper:
 
 
     def __prompt_existing(self):
-        tqdm.write('Found 10 existing torrentes prior to set minimum upload date, continue? Y/N')
         exit_answer = input()
 
         if exit_answer.lower() == 'n':
