@@ -170,7 +170,7 @@ def main():
     parser.add_argument('-d', '--date-up-min',
                         help='Date Uploaded Minimum DD/MM/YYYY format (e.g., 25/12/2024)',
                         dest='date_up_min',
-                        type=parse_date_to_unix
+                        type=str.lower
                         required=False,
                         default='en',
                         const='01/01/1970',
@@ -184,6 +184,7 @@ def main():
                         default='',
                         const='',
                         nargs='?')
+    
 
     try:
         args = parser.parse_args()
