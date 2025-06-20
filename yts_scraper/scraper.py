@@ -107,6 +107,8 @@ class Scraper:
         # Setup hashlist, if flag set
         if self.downloaded_movies:
             self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
+        else:
+            self.downloaded_movie_hashes == []
             
         self.pbar = None
 
