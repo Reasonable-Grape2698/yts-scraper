@@ -170,8 +170,8 @@ def main():
                         dest='downloaded_movies',
                         type=str.lower,
                         required=False,
-                        default=None,
-                        const=None,
+                        default='[]',
+                        const='[]',
                         nargs='?')
     
 
