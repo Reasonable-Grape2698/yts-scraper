@@ -166,12 +166,12 @@ def main():
                         nargs='?')
 
     parser.add_argument('-h', '--downloaded-movie-hashes',
-                        help='Simple line seperated file of downloaded movie IDs',
+                        help='CSV, JSON or line seperated movie hash list',
                         dest='downloaded_movies',
                         type=str.lower,
                         required=False,
-                        default='',
-                        const='',
+                        default=None,
+                        const=None,
                         nargs='?')
     
 
