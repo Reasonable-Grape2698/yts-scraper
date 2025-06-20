@@ -14,7 +14,7 @@ class Scraper:
     def __init__(self, args):
         self.language = args.language
         self.date_up_min = args.date_up_min
-        self.downloaded_movies = args.downloaded_movies
+        self.quality = args.quality
         self.apiKey = args.apiKey
         self.movie_count = None
         self.url = None
@@ -25,7 +25,7 @@ class Scraper:
         self.date_up_min_unix = int(datetime.datetime.strptime(self.date_up_min, "%d/%m/%Y").timestamp())
 
         def hash_importer(hashFile):
-            hashes = []
+            hashes = [
             def json_find_values_by_key(data_structure):
                 if isinstance(data_structure, dict):
                     for key, value in data_structure.items():
@@ -36,25 +36,48 @@ class Scraper:
                     for item in data_structure:
                         yield from json_find_values_by_key(item)
                         
-             # Try opening the file
-            try:
-                with open(hashFile, 'r') as file:
-                    data = json.load(file)
-            except FileNotFoundError:
-                print(f"Error: The file '{hashFile}' was not found. Continue? Y/N  (set to None if no)")
-                    self.__prompt_existing()
-                return []
+            # Try opening the file
+            def __real_debrid_get_Torrents(apiKey):
+                hashes = []
+                url = 'https://api.real-debrid.com/rest/1.0/torrents'
+                payload = {
+                    "limit": 5000,
+                    page: page
+                }
+                
+                # Generate random user agent header
+                try:
+                    user_agent = UserAgent()
+                    headers = {'User-Agent': user_agent.random, 'Content-Type': 'application/json', 'Authorization: Bearer {apiKey}'}
+                except:
+                    print('Error occurred during fake user agent generation.')
         
-                    # Hope it's JSON and find literally any key in called 'hash'
-            try:
-                hashes = list(json_find_values_by_key(data))
-                return hashes
-            except Exception as e:
-                return []
-        
-        # Setup hashlist, if flag set
-        self.downloaded_movie_hashes == hash_importer(self.downloaded_movies)
+                # Exception handling for connection errors
+                try:
+                    response = requests.get(url, json=payload, headers=headers, timeout=10)
+                    response.raise_for_status()
+                except requests.exceptions.HTTPError as errh:
+                    print('HTTP Error:', errh)
+                    sys.exit(0)
+                except requests.exceptions.ConnectionError as errc:
+                    print('Error Connecting:', errc)
+                    sys.exit(0)
+                except requests.exceptions.Timeout as errt:
+                    print('Timeout Error:', errt)
+                    sys.exit(0)
+                except requests.exceptions.RequestException as err:
+                    print('There was an error.', err)
+                    sys.exit(0)
 
+                try:
+                    data = response.json()
+                    hashes.append(list(json_find_values_by_key(data)))
+                    return hashes
+                except Exception as e
+                    print("Error: {e}")
+
+
+            
         self.pbar = None
         self.sort_by = 'date_uploaded_unix'
         self.order_by = 'desc'
