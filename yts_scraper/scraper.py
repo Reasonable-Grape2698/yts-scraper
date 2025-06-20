@@ -291,19 +291,10 @@ class Scraper:
         year = movie.get('year')
         language = movie.get('language')
         yts_url = movie.get('url')
-        date_uploaded_unix = movie.get('date_uploaded_unix')
 
         if year < self.year_limit:
             return
         if language != self.language:
-            return
-        
-        if date_uploaded_unix < self.date_up_min_unix:
-            tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
-            self.minimum_date_skipped += 1
-            if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
-                tqdm.write('Skipped 10 torrents due to being uploaded before specified date, continue? Y/N')
-                self.__prompt_existing()
             return
 
         # Every torrent option for current movie
@@ -326,6 +317,14 @@ class Scraper:
 
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
             hash = torrent.get('hash')
+            date_uploaded_unix = torrent.get('date_uploaded_unix')
+            if date_uploaded_unix < self.date_up_min_unix:
+                tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
+                self.minimum_date_skipped += 1
+                if self.minimum_date_skipped > 10 and not self.skip_exit_condition:
+                    tqdm.write('Skipped 10 torrents due to being uploaded before specified date, continue? Y/N')
+                    self.__prompt_existing()
+            return
             
             if self.downloaded_movie_hashes and hash in self.downloaded_movie_hashes:
                 tqdm.write('{}: Exists in downloaded hash list. Skipping...'.format(movie_name))
