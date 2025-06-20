@@ -210,7 +210,7 @@ class Scraper:
 
 
         print('Initializing download with these parameters:\n')
-        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nMinimum Upload Date:\t{}\nMinimum Upload Date Unix:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
+        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nMinimum Upload Date:\t{}\nMinimum Upload Date Unix:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\nDownloaded Movies File:\t{}\n'
               .format(
                   self.directory,
                   self.quality,
@@ -223,7 +223,8 @@ class Scraper:
                   self.page_arg,
                   str(self.poster),
                   str(self.imdb_id),
-                  str(self.multiprocess)
+                  str(self.multiprocess),
+                  self.downloaded_movies
                   )
              )
 
