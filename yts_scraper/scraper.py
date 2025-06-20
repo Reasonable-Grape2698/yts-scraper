@@ -210,7 +210,7 @@ class Scraper:
 
 
         print('Initializing download with these parameters:\n')
-        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nMinimum Upload Date:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
+        print('Directory:\t{}\nQuality:\t{}\nMovie Genre:\t{}\nMinimum Rating:\t{}\nCategorization:\t{}\nMinimum Year:\t{}\nMinimum Upload Date:\t{}Minimum Upload Date Unix:\t{}\nStarting page:\t{}\nMovie posters:\t{}\nAppend IMDb ID:\t{}\nMultiprocess:\t{}\n'
               .format(
                   self.directory,
                   self.quality,
@@ -219,6 +219,7 @@ class Scraper:
                   self.categorize,
                   self.year_limit,
                   self.date_up_min,
+                  self.date_up_min_unix,
                   self.page_arg,
                   str(self.poster),
                   str(self.imdb_id),
