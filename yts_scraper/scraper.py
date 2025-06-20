@@ -320,8 +320,6 @@ class Scraper:
             # if hash is in hashlist, count+=1. If > 10, prompt if user wants to exit.
             hash = torrent.get('hash')
             date_uploaded_unix = torrent.get('date_uploaded_unix')
-            print(hash)
-            print(date_uploaded_unix)
             if date_uploaded_unix < self.date_up_min_unix:
                 tqdm.write('{}: Uploaded prior to {}, skipping.'.format(movie_name, self.date_up_min))
                 self.minimum_date_skipped += 1
@@ -338,13 +336,15 @@ class Scraper:
                     self.__prompt_existing()
                 return
 
+            
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
-            if self.quality == 'all' or self.quality == quality:
-                bin_content_tor = (requests.get(torrent.get('url'))).content
-                path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
-                is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
-                self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
+            bin_content_tor = (requests.get(torrent.get('url'))).content
+            path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
+            is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
+            pprint(path)
+            print(is_download_successful)
+            self.__log_csv(movie_id, imdb_id, movie_name_short, year, language, movie_rating, quality, yts_url, torrent_url)
 
             if is_download_successful:
                 tqdm.write('Downloaded {} {}'.format(movie_name, quality.upper()))
