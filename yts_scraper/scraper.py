@@ -334,15 +334,14 @@ class Scraper:
                 if self.existing_hash_counter > 10 and not self.skip_exit_condition:
                     tqdm.write('Found 10 existing hashes thus far. Do you want to keep downloading? Y/N')
                     self.__prompt_existing()
-                    return
+                return
 
             quality = torrent.get('quality')
             torrent_url = torrent.get('url')
-            tqdm.write(torrent_url)
-            if self.categorize and self.categorize != 'rating':
+            if self.categorize and self.categorize != 'none':
                 if self.quality == 'all' or self.quality == quality:
                     bin_content_tor = (requests.get(torrent.get('url'))).content
-
+                    
                     for genre in movie_genres:
                         path = self.__build_path(movie_name, movie_rating, quality, genre, imdb_id)
                         is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
@@ -353,7 +352,7 @@ class Scraper:
                     path = self.__build_path(movie_name, movie_rating, quality, None, imdb_id)
                     is_download_successful = self.__download_file(bin_content_tor, bin_content_img, path, movie_name, movie_id)
 
-            if is_download_successful and self.quality == 'all' or self.quality == quality:
+            if is_download_successful:
                 tqdm.write('Downloaded {} {}'.format(movie_name, quality.upper()))
                 self.pbar.update()
 
@@ -374,7 +373,7 @@ class Scraper:
         elif self.categorize == 'genre-rating':
             directory += '/' + str(movie_genre) + '/' + str(math.trunc(rating)) + '+'
         elif self.categorize == 'none':
-            directory
+            directory = self.directory
         if self.poster:
             directory += '/' + movie_name
 
@@ -386,14 +385,13 @@ class Scraper:
             filename = '{} {}'.format(movie_name, quality)
 
         path = os.path.join(directory, filename)
-        print(path)
         return path
 
     # Write binary content to .torrent file
     def __download_file(self, bin_content_tor, bin_content_img, path, movie_name, movie_id):
-        print("downloading file")
         if self.csv_only:
             return
+        print(path, movie_name, movie_id)
 
         if self.existing_file_counter > 10 and not self.skip_exit_condition:
             tqdm.write('Found 10 existing files in a row. Do you want to keep downloading? Y/N')
@@ -406,6 +404,7 @@ class Scraper:
             
         with open(path + '.torrent', 'wb') as torrent:
             torrent.write(bin_content_tor)
+        tqdm.write('{}: Downloaded: {}'.format(movie_name))
         if self.poster:
             with open(path + '.jpg', 'wb') as torrent:
                 torrent.write(bin_content_img)
